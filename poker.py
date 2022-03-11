@@ -18,6 +18,8 @@ screen = pygame.display.set_mode((600,600))
 width = screen.get_width()
 height = screen.get_height()
 
+checkA = callA = raiseA = foldA = True
+
 def printCard(val, sym, pos) :
     if sym in ('♠','♣') : color = (0,0,0)
     else : color = (255,0,0)
@@ -30,13 +32,34 @@ def printCard(val, sym, pos) :
     
     screen.blit(text, textRect)
 
-def printMoney(amount, pos) :
+def printText(amount, pos, money) :
     font = pygame.font.SysFont('Arial',35)
-    text = font.render(f'{amount}$', True, (0,0,0)) # hibaforrás
+    if money : text = font.render(f'{amount}$', True, (0,0,0)) # hibaforrás
+    else: text = font.render(amount, True, (0,0,0)) # hibaforrás
     textRect = text.get_rect()
     textRect.center = pos
 
     screen.blit(text, textRect)
+
+def clearAll() :
+    screen.fill((100,255,100))
+    printCard(holes[0][0][0],holes[0][0][1], (width/2-30,520))
+    printCard(holes[0][1][0],holes[0][1][1], (width/2+30,520))
+    printText(money[0], (width-50, height-50),True)
+    pygame.display.flip()
+
+def drawButtons() :
+    pygame.draw.rect(screen,(200,200,200),(width-150,height-200,130,50))
+    printText('Check',(width-85,height-175),False)
+
+    pygame.draw.rect(screen,(200,200,200),(width-150,height-275,130,50))
+    printText('Call',(width-85,height-250),False)
+
+    pygame.draw.rect(screen,(200,200,200),(width-150,height-350,130,50))
+    printText('Raise',(width-85,height-325),False)
+
+    pygame.draw.rect(screen,(200,200,200),(width-150,height-425,130,50))
+    printText('Fold',(width-85,height-400),False)
 
 money = [100,100,100,100]
 dealer = 0
@@ -74,11 +97,7 @@ while True : #1 iteráció = egy kör a játékban
     pygame.display.flip()
     
     #1. kör
-    screen.fill((100,255,100))
-    printCard(holes[0][0][0],holes[0][0][1], (width/2-30,520))
-    printCard(holes[0][1][0],holes[0][1][1], (width/2+30,520))
-    printMoney(money[0], (width-50, height-50))
-    pygame.display.flip()
+    clearAll()
 
     for kor in range(3) :
         screen.fill((100,255,100))
@@ -100,19 +119,32 @@ while True : #1 iteráció = egy kör a játékban
 
         printCard(holes[0][0][0],holes[0][0][1], (width/2-30,520))
         printCard(holes[0][1][0],holes[0][1][1], (width/2+30,520))
-        printMoney(money[0], (width-50, height-50))
-        pygame.draw.rect(screen,(200,200,200),(width-100,height-200,80,50))
+        printText(money[0], (width-50, height-50), True)
+        #Buttons
+        drawButtons()
 
         pygame.display.flip()
 
         while True :
+            x, y = pygame.mouse.get_pos()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if width-100 <= mouse[0] <= width-20 and height-200 <= mouse[1] <= height-150 :
+                    if checkA and width-100 <= x <= width-20 and height-200 <= y <= height-150 :
                         pygame.quit()
+                        
                         break
+                    elif callA and width-100 <= x <= width-20 and height-275 <= y <= height-225 :
+                        pygame.quit()
+                    elif width-100 <= x <= width-20 and height-350 <= y <= height-300 :
+                        clearAll()
+                        pygame.draw.rect(screen,(200,200,200),(width-150,height-350,130,50))
+                        pygame.display.flip()
+                        checkA = callA = raiseA = foldA = False
+                    elif foldA and width-100 <= x <= width-20 and height-425 <= y <= height-375 :
+                        pygame.quit()
+                        
 
         
 
