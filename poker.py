@@ -7,7 +7,7 @@ import sys
 #vals = [2,3,4,5,6,7,8,9,10,'Jack','Queen','King','Ace']
 #symbols = ['Spades','Hearts','Diamonds','Clubs']
 
-vals = [2,3,4,5,6,7,8,9,10,'J','Q','K','A']
+vals = ['2','3','4','5','6','7','8','9','10','J','Q','K','A']
 symbols = ['♠','♥','♦','♣']
 dealer = 0
 
@@ -77,8 +77,22 @@ def drawButtons() :
     pygame.draw.rect(screen,(200,200,200),(width-150,height-425,130,50))
     printText('Fold',(width-85,height-400),False)
     
-def handCompare(cardsOne, cardsTwo) : #Hand értékének számítása
-    
+def handRecognition(cards) : #Hand értékének számítása
+    #high card, pair, two pair, three of a kind, straight, flush, full house, four of a kind, straight flush, royal flush
+    cards = [(2,3,4,5,6,7,8,9,10,11,12,13,14)[vals.index(i[0])] for i in cards]
+    straight = [int(i[0]) for i in cards]
+    straight.sort()
+    highestStraight = 0
+    highestStraightFlush = 0
+    for i in range(3):
+        if straight[i:i+5] in [[n,n+1,n+2,n+3,n+4,n+5] for n in range(2,11)]:
+            if straight[i] > highestStraightFlush and #ellenőrizd hogy flush-e?:
+                highestStraightFlush = straight[i]
+                
+            if straight[i] > highestStraight :
+                highestStraight = straight[i]
+                
+    if highestStraight == 10 and #royal flush ellenőrzése
 
 def playerResponse(kor) :
     active = False
@@ -155,7 +169,7 @@ while True : #1 iteráció = egy kör a játékban
             test = True
             while test :
                 test = False
-                card = (random.choice(vals),random.choice(symbols))
+                card = (str(random.choice(vals)),random.choice(symbols))
                 for l in holes :
                     for m in l :
                         if m == card : test = True
@@ -167,7 +181,7 @@ while True : #1 iteráció = egy kör a játékban
         test = True
         while test :
             test = False
-            card = (random.choice(vals),random.choice(symbols))
+            card = (str(random.choice(vals)),random.choice(symbols))
             if card in river : continue
             for l in holes :
                 for m in l :
