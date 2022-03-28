@@ -5,13 +5,13 @@ import sys
 
 # ♠♥♦♣
 #vals = [2,3,4,5,6,7,8,9,10,'Jack','Queen','King','Ace']
-#symbols = ['Spades','Hearts','Diamonds','Clubs']
+#suits = ['Spades','Hearts','Diamonds','Clubs']
 
 vals = ['2','3','4','5','6','7','8','9','10','J','Q','K','A']
-symbols = ['♠','♥','♦','♣']
+suits = ['♠','♥','♦','♣']
 dealer = 0
 
-#print(random.choice(vals),"of",random.choice(symbols))
+#print(random.choice(vals),"of",random.choice(suits))
 
 pygame.init()
 screen = pygame.display.set_mode((600,600))
@@ -79,20 +79,50 @@ def drawButtons() :
     
 def handRecognition(cards) : #Hand értékének számítása
     #high card, pair, two pair, three of a kind, straight, flush, full house, four of a kind, straight flush, royal flush
-    cards = [(2,3,4,5,6,7,8,9,10,11,12,13,14)[vals.index(i[0])] for i in cards]
-    straight = [int(i[0]) for i in cards]
-    straight.sort()
+    cards = [((2,3,4,5,6,7,8,9,10,11,12,13,14)[vals.index(i[0])], i[1]) for i in cards]
+    #straight = cards.copy() talán szügség lesz rá
+    cards.sort(key=lambda x: x[0])
+    straight = [i[0] for i in cards]
+    Flush = [i[1] for i in cards]
     highestStraight = 0
     highestStraightFlush = 0
     for i in range(3):
         if straight[i:i+5] in [[n,n+1,n+2,n+3,n+4,n+5] for n in range(2,11)]:
-            if straight[i] > highestStraightFlush and #ellenőrizd hogy flush-e?:
+            if straight[i] > highestStraightFlush and [k[1] for k in cards[i:i+5]] in (['♠']*5,['♥']*5,['♦']*5,['♣']*5) :
                 highestStraightFlush = straight[i]
                 
             if straight[i] > highestStraight :
                 highestStraight = straight[i]
                 
-    if highestStraight == 10 and #royal flush ellenőrzése
+    ofAKind = [0,0] #[what kind, what value]
+    ofAKind[0] = max([straight.count(k) for k in range(2,15)])
+    ofAKind[1] = max([k for k in range(2,15) if straight.count(k) == ofAKind[0]])
+    
+    fullHouse = [0,0] #[three of a kind, pair]
+    if 2 in [straight.count(k) for k in range(2,15)] and 3 in [straight.count(k) for k in range(2,15)] :
+        fullHouse[0] = max([k for k in range(2,15) if straight.count(k) >= 3])
+        fullHouse[1] = max([k for k in range(2,15) if straight.count(k) >= 2])
+                
+    if highestStraightFlush == 10 : #ez az egész mit returnöljön ahhoz, hogy ezt össze tudjuk hasonlítani egy másikkal?
+        
+    elif highestStraightFlush > 0 :
+        
+    elif ofAKind[0] == 4 :
+        
+    elif sum(fullHouse) >= 2 :
+        
+    elif flush.count('♠') == 5 or flush.count('♥') == 5 or flush.count('♦') == 5 or flush.count('♣') == 5 :
+        
+    elif highestStraight > 0 :
+        
+    elif ofAKind[0] == 3 :
+        
+    elif len([k for k in range(2,15) if straight.count(k) >= 2]) >= 2 :
+        
+    elif ofAKind[0] == 2 :
+        
+    else :
+        
 
 def playerResponse(kor) :
     active = False
@@ -169,7 +199,7 @@ while True : #1 iteráció = egy kör a játékban
             test = True
             while test :
                 test = False
-                card = (str(random.choice(vals)),random.choice(symbols))
+                card = (str(random.choice(vals)),random.choice(suits))
                 for l in holes :
                     for m in l :
                         if m == card : test = True
@@ -181,7 +211,7 @@ while True : #1 iteráció = egy kör a játékban
         test = True
         while test :
             test = False
-            card = (str(random.choice(vals)),random.choice(symbols))
+            card = (str(random.choice(vals)),random.choice(suits))
             if card in river : continue
             for l in holes :
                 for m in l :
