@@ -104,7 +104,7 @@ def handRecognition(cards) : #Hand értékének számítása
         fullHouse[1] = max([k for k in range(2,15) if straight.count(k) >= 2])
                 
     if highestStraightFlush == 10 : #ez az egész mit returnöljön ahhoz, hogy ezt össze tudjuk hasonlítani egy másikkal?
-        
+        return [0, []]
     elif highestStraightFlush > 0 :
         
     elif ofAKind[0] == 4 :
