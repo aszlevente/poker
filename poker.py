@@ -105,39 +105,45 @@ def handRecognition(cards) : #Hand értékének számítása
                 
     row = straight
     
+    row.sort(reverse=True)
+    
     if highestStraightFlush == 10 : 
     return [0, row]
         
     elif highestStraightFlush > 0 :
         for i in range(1,6): row.pop(row.find(i))
-        return [1, [highestStraightFlush].extend(row)]
+        return [1, [highestStraightFlush] + row]
         
     elif ofAKind[0] == 4 :
         for i in range(ofAKind[0]): row.pop(row.find(ofAKind[1]))
-        return [2, [ofAKind[1]].extend(row)]
+        return [2, [ofAKind[1]] + row]
         
     elif sum(fullHouse) >= 2 :
         for i in range(3): row.pop(row.find(fullHouse[0]))
         for i in range(2): row.pop(row.find(fullHouse[1]))
-        fullHouse.extend(row)
-        return [3, fullHouse]
+        return [3, fullHouse + row]
         
     elif flush.count('♠') == 5 or flush.count('♥') == 5 or flush.count('♦') == 5 or flush.count('♣') == 5 :
     # csinál egy arrayt az összes ugyanolyan jelű kártyából, sorba rendezi, kidobja a legkisebbe(ke)t ha 5nél több van aztán kivonja ezeket a row-ból és joinolja az arrayt és a row-t
         
     elif highestStraight > 0 :
         for i in range(1,6): row.pop(row.find(i))
-        return [5, [highestStraight].extend(row)]
+        return [5, [highestStraight] + row]
         
     elif ofAKind[0] == 3 :
         for i in range(ofAKind[0]): row.pop(row.find(ofAKind[1]))
-        return [6, [ofAKind[1]].extend(row)]
+        return [6, [ofAKind[1]] + row]
         
     elif len([k for k in range(2,15) if straight.count(k) >= 2]) >= 2 :
+        pairs = [k for k in range(2,15) if straight.count(k) >= 2]
+        pairs.sort()
+        for i in range(2): row.pop(row.find(pairs[0]))
+        for i in range(2): row.pop(row.find(pairs[1]))
+        return [7, pairs[0:2] + row]
         
     elif ofAKind[0] == 2 :
         for i in range(ofAKind[0]): row.pop(row.find(ofAKind[1]))
-        return [8, [ofAKind[1]].extend(row)]
+        return [8, [ofAKind[1]] + row]
         
     else : return [9, row]
         
