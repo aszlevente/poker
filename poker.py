@@ -108,7 +108,7 @@ def handRecognition(cards) : #Hand értékének számítása
     row.sort(reverse=True)
     
     if highestStraightFlush == 10 : 
-    return [0, row]
+        return [0, row]
         
     elif highestStraightFlush > 0 :
         for i in range(1,6): row.pop(row.find(i))
@@ -125,6 +125,14 @@ def handRecognition(cards) : #Hand értékének számítása
         
     elif flush.count('♠') == 5 or flush.count('♥') == 5 or flush.count('♦') == 5 or flush.count('♣') == 5 :
     # csinál egy arrayt az összes ugyanolyan jelű kártyából, sorba rendezi, kidobja a legkisebbe(ke)t ha 5nél több van aztán kivonja ezeket a row-ból és joinolja az arrayt és a row-t
+        cards.sort(reverse=True, key=lambda x: x[0])
+        for i in suits :
+            if [k[1] for k in cards].count(i) >= 5 : winningSuit = i
+            
+        for i in cards :
+            if i[1] != winningSuit : cards.pop(cards.find(i))
+            
+        return [4, [i[0] for i in cards][0:6]]
         
     elif highestStraight > 0 :
         for i in range(1,6): row.pop(row.find(i))
@@ -321,6 +329,9 @@ while True : #1 iteráció = egy kör a játékban
         
         if kor == 3 or winner >= 0:
             #kártyavillantás
+            
+            [handRecognition(holes[i]) for i in range(4) if folded[i] == False]
+            
             money[winner] += pot
             break
         
