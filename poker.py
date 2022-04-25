@@ -11,15 +11,13 @@ vals = ['2','3','4','5','6','7','8','9','10','J','Q','K','A']
 suits = ['♠','♥','♦','♣']
 dealer = 0
 
-#print(random.choice(vals),"of",random.choice(suits))
-
 pygame.init()
 screen = pygame.display.set_mode((600,600))
 
 width = screen.get_width()
 height = screen.get_height()
 
-checkA = callA = raiseA = foldA = True
+checkA = callA = raiseA = foldA = True # TODO raiseA egyenlőre teljesen fölösleges, töröld ha a végén is az
 
 def printCard(val, sym, pos) :
     if sym in ('♠','♣') : color = (0,0,0)
@@ -27,7 +25,6 @@ def printCard(val, sym, pos) :
 
     font = pygame.font.SysFont('Arial',35)
     text = font.render(str(val)+sym, True, color)
-    print(str(val)+sym)
     textRect = text.get_rect()
     textRect.center = pos
     
@@ -44,6 +41,7 @@ def printText(amount, pos, money) :
 
 def clearAll(kor) :
     screen.fill((100,255,100))
+    print(holes[0][0][0],holes[0][0][1],'\n')
     printCard(holes[0][0][0],holes[0][0][1], (width/2-30,520))
     printCard(holes[0][1][0],holes[0][1][1], (width/2+30,520))
     printText(money[0], (width-50, height-50),True)
@@ -124,7 +122,6 @@ def handRecognition(cards) : #Hand értékének számítása
         return [3, fullHouse + row]
         
     elif flush.count('♠') == 5 or flush.count('♥') == 5 or flush.count('♦') == 5 or flush.count('♣') == 5 :
-    # csinál egy arrayt az összes ugyanolyan jelű kártyából, sorba rendezi, kidobja a legkisebbe(ke)t ha 5nél több van aztán kivonja ezeket a row-ból és joinolja az arrayt és a row-t
         cards.sort(reverse=True, key=lambda x: x[0])
         for i in suits :
             if [k[1] for k in cards].count(i) >= 5 : winningSuit = i
@@ -157,20 +154,20 @@ def handRecognition(cards) : #Hand értékének számítása
         
 
 def playerResponse(kor) :
+    global checkA, callA, raiseA, foldA
     active = False
     bet = '0'
     while True :
+        
         x, y = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if checkA and width-100 <= x <= width-20 and height-200 <= y <= height-150 :
-                    pygame.quit()
-                    
-                    break
+                    return 0
                 elif callA and width-100 <= x <= width-20 and height-275 <= y <= height-225 :
-                    pygame.quit()
+                    return int(bet)
 
                 # raise összeg megadása
                 elif width-100 <= x <= width-20 and height-350 <= y <= height-300 :
@@ -187,9 +184,9 @@ def playerResponse(kor) :
                     
                     
                 elif foldA and width-100 <= x <= width-20 and height-425 <= y <= height-375 :
-                    pygame.quit()
+                    return -1
 
-                elif active :
+                elif active :# no idea miért itt van de működik
                     active = False
                     clearAll(kor)
                     drawButtons()
@@ -205,8 +202,7 @@ def playerResponse(kor) :
                         drawButtons()
                         pygame.display.flip()
                         checkA = callA = raiseA = foldA = True
-                        bet = '0'
-                        break
+                        return int(bet)
                     elif event.key == pygame.K_BACKSPACE:
                         bet = '0' if len(bet) == 1 else bet[:-1]
                         
@@ -217,14 +213,13 @@ def playerResponse(kor) :
                     pygame.draw.rect(screen,(200,200,200),(width-150,height-350,130,50))
                     printText(bet,(width-85,height-325),True)
                     pygame.display.flip()
-    return int(bet)
 
 money = [100,100,100,100]
 dealer = 0
 blind = 2
 
 while True : #1 iteráció = egy kör a játékban
-
+    print('ugye nem')
     holes = [[],[],[],[]] # az első a játékos
     for hole in holes :
         for i in range(2) :
@@ -274,20 +269,21 @@ while True : #1 iteráció = egy kör a játékban
         activePlayer = dealer+3 if kor == 0 else dealer+1
         if activePlayer > 3: activePlayer -= 4
         while True :
+            
             if [folded[i] for i in range(4) if i != activePlayer] == [False]*4:
                 winner = activePlayer
                 break
             
-            if activePlayer == 0 and folded[0] == True:
+            if activePlayer == 0 and folded[0] == False:
+                print('respErr')
                 resp = playerResponse(kor)
-                if resp != -1:
+                if resp == -1:
                     folded[0] = True
-                    bets.pop(0)
                 else:
                     money[0] -= resp
                     bets[0] += resp
                     
-            elif  folded[activePlayer] == True:
+            elif  folded[activePlayer] == False:
                 # computer-controled-player action
                 if bets[activePlayer] < max(bets):
                     #raise, call or fold
@@ -328,9 +324,14 @@ while True : #1 iteráció = egy kör a játékban
         pot += sum(bets)
         
         if kor == 3 or winner >= 0:
-            #kártyavillantás
             
-            [handRecognition(holes[i]) for i in range(4) if folded[i] == False]
+            playerHands = [handRecognition(holes[i]) if not folded[i] else [10] for i in range(4)]
+            
+            handTypes = ['Royal Flush', 'Straight Flush', 'Four Of A Kind', 'Full House', 'Flush', 'Straight', 'Three Of A Kind', 'Two Pair', 'Pair', 'High Card', 'Folded']
+            
+            #kártyavillantás, handek kiírása
+            for i in range(4) :
+                pass
             
             money[winner] += pot
             break
