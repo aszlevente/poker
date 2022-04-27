@@ -19,27 +19,28 @@ height = screen.get_height()
 
 checkA = callA = raiseA = foldA = True # TODO raiseA egyenlőre teljesen fölösleges, töröld ha a végén is az
 
-def printCard(val, sym, pos) :
+def printCard(val, sym, pos, size=35, spac=0) :
     if sym in ('♠','♣') : color = (0,0,0)
     else : color = (255,0,0)
 
-    font = pygame.font.SysFont('Arial',35)
+    font = pygame.font.SysFont('Arial',size)
     text = font.render(str(val)+sym, True, color)
     textRect = text.get_rect()
-    textRect.center = pos
-    
+    textRect.center = (10 + pos[0] + spac + (text.get_width()/2),pos[1]) if spac else pos
+    #makes two cards have a certain distance from each other if "spac" argument is given
     screen.blit(text, textRect)
+    return text.get_width()
 
-def printText(amount, pos, money) :
-    font = pygame.font.SysFont('Arial',35)
-    if money : text = font.render(f'{amount}$', True, (0,0,0)) # hibaforrás
+def printText(amount, pos, dollar=False, size=35) :
+    font = pygame.font.SysFont('Arial',size)
+    if dollar : text = font.render(f'{amount}$', True, (0,0,0)) # hibaforrás
     else: text = font.render(amount, True, (0,0,0)) # hibaforrás
     textRect = text.get_rect()
     textRect.center = pos
 
     screen.blit(text, textRect)
 
-def clearAll(kor) :
+def clearAll(kor,reveal=False) :
     screen.fill((100,255,100))
     print(holes[0][0][0],holes[0][0][1],'\n')
     printCard(holes[0][0][0],holes[0][0][1], (width/2-30,520))
@@ -60,6 +61,12 @@ def clearAll(kor) :
         printCard(river[2][0],river[2][1], (width/2,height/2))
         printCard(river[3][0],river[3][1], (width/2+60,height/2))
         printCard(river[4][0],river[4][1], (width/2+120,height/2))
+    for i in range(3): #többi játékosok adatainak mutatása
+        printText(f'Player {i+1}', (80,40+i*60), size=30)
+        printText(money[i+1], (180,40+i*60), True, size=25)
+        if reveal:
+            firstCardWidth = printCard(holes[i+1][0][0], holes[i+1][0][1], (90,70+i*60), 20)
+            printCard(holes[i+1][1][0], holes[i+1][1][1], (90,70+i*60), 20, spac=firstCardWidth/2)
     pygame.display.flip()
 
 def drawButtons() :
@@ -162,12 +169,12 @@ def playerResponse(kor) :
         x, y = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
+                sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if checkA and width-100 <= x <= width-20 and height-200 <= y <= height-150 :
                     return 0
                 elif callA and width-100 <= x <= width-20 and height-275 <= y <= height-225 :
-                    return int(bet)
+                    if max(bets)-bets[0] <= money[0]: return max(bets)-bets[0]
 
                 # raise összeg megadása
                 elif width-100 <= x <= width-20 and height-350 <= y <= height-300 :
@@ -195,7 +202,7 @@ def playerResponse(kor) :
 
             if event.type == pygame.KEYDOWN:
                 if active:
-                    if event.key == pygame.K_RETURN:
+                    if event.key == pygame.K_RETURN and max(bets)-bets[0] < int(bet) <= money[0]:
                         print(f'{bet}$')
                         active = False
                         clearAll(kor)
@@ -220,7 +227,7 @@ blind = 2
 
 while True : #1 iteráció = egy kör a játékban
     print('ugye nem')
-    holes = [[],[],[],[]] # az első a játékos
+    holes = [[],[],[],[]] # az első az élő játékos
     for hole in holes :
         for i in range(2) :
             test = True
@@ -251,10 +258,11 @@ while True : #1 iteráció = egy kör a játékban
     
 
     for kor in range(4) :
-        clearAll(kor)
+        clearAll(kor, True)
         drawButtons()
         pygame.display.flip()
 
+        global bets
         bets = [0,0,0,0]
         folded = [False]*4
         checked = [False]*4
@@ -275,8 +283,8 @@ while True : #1 iteráció = egy kör a játékban
                 break
             
             if activePlayer == 0 and folded[0] == False:
-                print('respErr')
-                resp = playerResponse(kor)
+                
+                resp = playerResponse(kor,bets)
                 if resp == -1:
                     folded[0] = True
                 else:

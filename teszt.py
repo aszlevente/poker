@@ -1,9 +1,6 @@
-a = b = 'lol'
+import sys
+import pygame
 
-def sk() :
-    global a, b
-    print(a,b)
-    a = 'l'
-
-sk()
-sk()
+pygame.init()
+screen = pygame.display.set_mode((600,600))
+pygame.quit()
