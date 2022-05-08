@@ -41,9 +41,7 @@ def printText(amount, pos, dollar=False, size=35) :
     screen.blit(text, textRect)
 
 def clearAll(kor,reveal=False) :
-    print(actions, 'ez')
     screen.fill((100,255,100))
-    print(holes[0][0][0],holes[0][0][1],'\n')
     printCard(holes[0][0][0],holes[0][0][1], (width/2-30,520))
     printCard(holes[0][1][0],holes[0][1][1], (width/2+30,520))
     printText(money[0], (width-50, height-50),True)
@@ -162,7 +160,6 @@ def handRecognition(cards) : #Hand értékének számítása
         
     else : return [9, row]
         
-
 def playerResponse(kor) :
     global checkA, callA, raiseA, foldA
     active = False
@@ -230,7 +227,6 @@ dealer = 0
 blind = 2
 
 while True : #1 iteráció = egy kör a játékban
-    print('ugye nem')
     holes = [[],[],[],[]] # az első az élő játékos
     for hole in holes :
         for i in range(2) :
@@ -273,7 +269,7 @@ while True : #1 iteráció = egy kör a játékban
         
         if kor == 0:
             money[dealer+1 if dealer+1 < 4 else dealer-3]  -= int(blind/2)
-            bets[dealer+1 if dealer+1 < 4 else dealer-3] += int(blind)/2
+            bets[dealer+1 if dealer+1 < 4 else dealer-3] += int(blind/2)
             
             money[dealer+2 if dealer+2 < 4 else dealer-2]  -= int(blind)
             bets[dealer+2 if dealer+2 < 4 else dealer-2] += int(blind)
@@ -282,8 +278,8 @@ while True : #1 iteráció = egy kör a játékban
         if activePlayer > 3: activePlayer -= 4
         while True :
             
-            if [folded[i] for i in range(4) if i != activePlayer] == [False]*4:
-                winner = activePlayer
+            if folded.count(True) == 3:
+                winner = folded.index(False)
                 break
             
             if activePlayer == 0 and folded[0] == False:
@@ -300,14 +296,14 @@ while True : #1 iteráció = egy kör a játékban
                 if bets[activePlayer] < max(bets):
                     #raise, call or fold
                     act = random.random()
-                    if act < 0.5:
+                    if act < 0.8:
                         #call
                         money[activePlayer] -= max(bets)-bets[activePlayer]
                         bets[activePlayer] += max(bets)-bets[activePlayer]
                         actions[activePlayer] = 'Call'
                     elif act < 0.95:
                         #raise
-                        raiseAmount = random.randint(1,money[activePlayer])
+                        raiseAmount = random.randint(1+(max(bets)-bets[activePlayer]),money[activePlayer])
                         money[activePlayer] -= raiseAmount
                         bets[activePlayer] += raiseAmount
                         actions[activePlayer] = 'Raise'
@@ -318,7 +314,7 @@ while True : #1 iteráció = egy kör a játékban
                 elif bets[activePlayer] == max(bets):
                     #check or raise
                     act = random.random()
-                    if act < 0.5:
+                    if act < 0.8:
                         checked[activePlayer] = True
                         actions[activePlayer] = 'Check'
                     else:
@@ -333,13 +329,13 @@ while True : #1 iteráció = egy kör a játékban
             pygame.display.flip()
 
             if not folded[activePlayer]: time.sleep(2)
-            print(actions)
             activePlayer = 0 if activePlayer == 3 else activePlayer+1
             
             aliveBets = [bets[i] for i in range(4) if not folded[i]]
 
             if bets == ([aliveBets[0]]*len(aliveBets) and aliveBets != [0]*len(aliveBets)) or (aliveBets == [0]*len(aliveBets) and checked == [True]*len(aliveBets)):
                 actions = [None]*4
+                print('betting kör vége')
                 break # betting kör vége
 
         pot += sum(bets)
